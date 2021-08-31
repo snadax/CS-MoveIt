@@ -7,6 +7,7 @@ using MoveItIntegration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Linq;
 using System.Threading;
 using System.Xml.Serialization;
@@ -165,5 +166,57 @@ namespace MoveIt
             }
         }
 
+
+        public void ExportBuildings()
+        {
+            if (ToolState != ToolStates.Default) return;
+
+            StringBuilder jsonstr = new StringBuilder();
+            jsonstr.Append("[");
+            foreach (var selectbuild in Action.selection)
+            {
+
+                Building bd = BuildingManager.instance.m_buildings.m_buffer[selectbuild.id.Building];
+                if (bd.m_flags != Building.Flags.None)
+                {
+                    jsonstr.Append("{");
+                    string[] str = bd.Info.name.Split('.');
+                    if (str.Length == 2)
+                    {
+                        jsonstr.Append($"\"group\":\"{str[0]}\",");
+                        jsonstr.Append($"\"name\":\"{str[1].Replace("_Data", string.Empty).Replace(" ", string.Empty)}\",");
+                    }
+                    else
+                    {
+                        jsonstr.Append($"\"group\":\"\",");
+                        jsonstr.Append($"\"name\":\"{bd.Info.name}\",");
+                    }
+                    jsonstr.Append($"\"angle\":\"{bd.m_angle}\",");
+                    jsonstr.Append($"\"position\":\"{bd.m_position}\",");
+                    jsonstr.Append($"\"submeshs\":[");
+                    if (bd.Info.m_subMeshes.Length > 0)
+                    {
+                        foreach (var item in bd.Info.m_subMeshes)
+                        {
+                            jsonstr.Append($"\"{item.m_subInfo.name}\",");
+                        }
+                        jsonstr.Remove(jsonstr.Length - 1, 1);
+                    }
+                    jsonstr.Append("]},");
+                }
+            }
+            jsonstr.Remove(jsonstr.Length - 1, 1);
+            jsonstr.Append("]");
+
+            string path = Path.Combine(DataLocation.addonsPath, "ExportBuildings");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            string fileName = Path.Combine(path, "ExportedBuildings.json");
+            using (StreamWriter sw = new StreamWriter(fileName))
+                sw.WriteLine(jsonstr.ToString());
+        }
     }
 }

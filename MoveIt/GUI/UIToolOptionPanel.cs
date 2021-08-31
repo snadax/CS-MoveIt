@@ -491,6 +491,7 @@ namespace MoveIt
             othersBtn.CreateSubButton("MoveIt_AlignLineBtn", Str.toolbox_LineUpObjects, "AlignLine");
             othersBtn.CreateSubButton("MoveIt_AlignMirrorBtn", Str.toolbox_MirrorObjects, "AlignMirror");
             othersBtn.CreateSubButton("MoveIt_ResetObjectBtn", Str.toolbox_ResetObjects, "ResetObject");
+            othersBtn.CreateSubButton("MoveIt_ExportBuildingsBtn", "ExportBuildings", "ExportBuildings");
             othersBtn.CreateSubButton("MoveIt_MoveToBtn", Str.toolbox_SetPosition, "MoveTo");
             othersBtn.CreateSubSeparator("MoveIt_FileSeparator");
             othersBtn.CreateSubButton("MoveIt_LoadBtn", Str.toolbox_ImportSelection, "Load");

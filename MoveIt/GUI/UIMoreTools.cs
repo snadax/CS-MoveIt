@@ -322,7 +322,11 @@ namespace MoveIt
                     CheckCloseMenu();
                     MIT.DeactivateTool();
                     break;
+                case "MoveIt_ExportBuildingsBtn":
 
+                    MIT.ExportBuildings();
+                    CheckCloseMenu();
+                    break;
                 case "MoveIt_MoveToBtn":
                     m_activeToolMenu = MoreButtons["MoveIt_OthersBtn"];
                     if (!MoveItTool.instance.StartTool(MoveItTool.ToolStates.ToolActive, MoveItTool.MT_Tools.MoveTo))

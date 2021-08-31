@@ -170,6 +170,7 @@ namespace MoveIt
         public void ExportBuildings()
         {
             if (ToolState != ToolStates.Default) return;
+            if (Action.selection.Count == 0) return;
 
             StringBuilder jsonstr = new StringBuilder();
             jsonstr.Append("[");

@@ -485,17 +485,18 @@ namespace MoveIt
             #endregion
 
             #region More Tools / Toolbox buttons
-            UIMoreToolsBtn othersBtn = new UIMoreToolsBtn(this, "MoveIt_OthersBtn", Str.toolbox_OtherTools_Tooltip, "MenuOthers", mtpContainer, "m_mtOthersList", (MoveItTool.PO.Enabled ? 7.25f : 6.25f));
+            UIMoreToolsBtn othersBtn = new UIMoreToolsBtn(this, "MoveIt_OthersBtn", Str.toolbox_OtherTools_Tooltip, "MenuOthers", mtpContainer, "m_mtOthersList", (MoveItTool.PO.Enabled ? 8.25f : 7.25f));
             if (MoveItTool.PO.Enabled)
                 othersBtn.CreateSubButton("MoveIt_ConvertToPOBtn", Str.toolbox_ConvertToPO, "ConvertToPO");
             othersBtn.CreateSubButton("MoveIt_AlignLineBtn", Str.toolbox_LineUpObjects, "AlignLine");
             othersBtn.CreateSubButton("MoveIt_AlignMirrorBtn", Str.toolbox_MirrorObjects, "AlignMirror");
             othersBtn.CreateSubButton("MoveIt_ResetObjectBtn", Str.toolbox_ResetObjects, "ResetObject");
-            othersBtn.CreateSubButton("MoveIt_ExportBuildingsBtn", "ExportBuildings", "ExportBuildings");
             othersBtn.CreateSubButton("MoveIt_MoveToBtn", Str.toolbox_SetPosition, "MoveTo");
             othersBtn.CreateSubSeparator("MoveIt_FileSeparator");
             othersBtn.CreateSubButton("MoveIt_LoadBtn", Str.toolbox_ImportSelection, "Load");
             othersBtn.CreateSubButton("MoveIt_SaveBtn", Str.toolbox_ExportSelection, "Save");
+            othersBtn.CreateSubSeparator("MoveIt_FileSeparator");
+            othersBtn.CreateSubButton("MoveIt_ExportBuildingsBtn", "ExportBuildings", "ExportBuildings");
             othersBtn.UpdateWidth();
 
             UIMoreToolsBtn rotateBtn = new UIMoreToolsBtn(this, "MoveIt_RotateBtn", Str.toolbox_RotationTools_Tooltip, "MenuRotate", mtpContainer, "m_mtRotateList", 3f);

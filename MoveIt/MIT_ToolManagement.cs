@@ -193,7 +193,9 @@ namespace MoveIt
                         jsonstr.Append($"\"name\":\"{bd.Info.name}\",");
                     }
                     jsonstr.Append($"\"angle\":\"{bd.m_angle}\",");
-                    jsonstr.Append($"\"position\":\"{bd.m_position}\",");
+                    jsonstr.Append($"\"x\":\"{bd.m_position.x}\",");
+                    jsonstr.Append($"\"y\":\"{bd.m_position.y}\",");
+                    jsonstr.Append($"\"z\":\"{bd.m_position.z}\",");
                     jsonstr.Append($"\"submeshs\":[");
                     if (bd.Info.m_subMeshes.Length > 0)
                     {

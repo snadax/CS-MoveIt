@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+from posixpath import split
 import re
 import bpy
 import math
@@ -11,28 +12,43 @@ from . import unreal
 
 import json
 def merge_meshs_imp(filepath):
-
+    
+    #删除场景
+    for i in bpy.data.objects:
+        bpy.context.selected_objects.append(i)
+    bpy.ops.object.delete()
+    
     # 加载json文件
     f = open(filepath, 'r', encoding='utf-8')
     data = f.read()
     f.close()
     obj = json.loads(data)
     
-    #遍历submesh 找到要加载的所有fbx
+    #遍历submesh 找到要加载的所有fbx和材质分类
     toLoadFbx = {}
+    allMat = {}
     for i in obj:
         for j in i["submeshs"]:
-            toLoadFbx[i["group"]+"/"+j+".fbx"] = i
-        print(i["group"])
-        print(i["name"])
-        print(i["angle"])
+            fbxname =i["group"]+"\\"+j+".fbx"
+            toLoadFbx[fbxname] = i
+            s = j.split('-')
+            if len(s) == 2:
+                if s[1] not in allMat:
+                    allMat[s[1]] = []
+                bd = {}
+                bd["mesh"] = fbxname
+                bd["x"] = float(i["x"])
+                bd["y"] = float(i["y"])
+                bd["z"] = float(i["z"])
+                bd["angle"] = float(i["angle"])
+                allMat[s[1]].append(bd)
+                
 
     #导入所有fbx
-    
     prepath = os.path.dirname(filepath)
     for i in toLoadFbx:
-        import_unreal_4_asset(prepath+"\\"+i)
-        toLoadFbx[i] = bpy.context.selected_objects
+        import_tomerge_asset(prepath+"\\SourceData\\"+i)
+        toLoadFbx[i] = bpy.context.selected_objects[0]
 
     #移除所有材质槽
     for obj in bpy.data.objects:
@@ -41,14 +57,27 @@ def merge_meshs_imp(filepath):
             for i in range(len(obj.material_slots)):
                 bpy.ops.object.material_slot_remove({'object': obj})
     
-    #合并所有模型
-    for obj in bpy.data.objects:
-        if  obj.type == 'MESH':
+    #分别合并各个材质
+    deselect_all_objects()
+    for i in allMat:
+        for bd in allMat[i]:
+            balloon = toLoadFbx[bd["mesh"]]
+            obj= bpy.data.objects.new(balloon.name, balloon.data.copy())
+            bpy.context.scene.collection.objects.link(obj)  
+            obj.rotation_euler = Vector((0,0,bd["angle"]))
+            obj.location = Vector((bd["z"],bd["x"],bd["y"]-60.0))
             obj.select_set(True)
             bpy.context.view_layer.objects.active = obj
-        else:
-            obj.select_set(False)
-    bpy.ops.object.join()
+            toLoadFbx[bd["mesh"]].select_set(False)
+        bpy.ops.object.join()
+        bpy.context.view_layer.objects.active.name = "combined_"+i
+        deselect_all_objects()
+
+    #删除基础的fbx
+    for i in toLoadFbx:
+        toLoadFbx[i].select_set(True)
+    bpy.ops.object.delete()
+
         
         
     #添加一个材质槽
@@ -56,9 +85,47 @@ def merge_meshs_imp(filepath):
         if  obj.type == 'MESH':
             bpy.ops.object.material_slot_add({'object': obj})
     
+    #导出fbx
+    jsonname,ext = os.path.splitext(os.path.basename(filepath))
+    dataDir = os.path.join(prepath,"CombinedData")
+    if not os.path.exists(dataDir):
+        os.makedirs(dataDir)
+    for obj in bpy.data.objects:
+        if  obj.type == 'MESH':
+            obj.select_set(True)
+            name = bpy.path.clean_name(obj.name)
+            jsondir = os.path.join(dataDir,jsonname)
+            if not os.path.exists(jsondir):
+                os.makedirs(jsondir)
+            fn = os.path.join(jsondir, name)
+            bpy.ops.export_scene.fbx(filepath=fn + ".fbx", use_selection=True)
+            obj.select_set(False)
+
+def import_tomerge_asset(file_path):
+    """
+    This function imports an unreal asset, fixes the armature scale factor, and rounds the keyframe to the nearest
+    integer.
+
+    :param str file_path: The full file path the file on disk.
+    """
+    # import the fbx file
+    bpy.ops.import_scene.fbx(filepath=file_path)
+
+    #还原所有旋转
+    for ordered_object in bpy.context.selected_objects:
+        # run the export iteration but with "scale" set to the scale of the object as it was imported
+        ordered_object.rotation_quaternion = Quaternion((0, 0, 0), 1)
+        ordered_object.rotation_euler = Vector((0, 0, 0))
+        ordered_object.scale = Vector((1,1,1))
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     
-    #print(obj)
-    
+    #还原缩放
+    for ordered_object in bpy.context.selected_objects:
+        # run the export iteration but with "scale" set to the scale of the object as it was imported
+        ordered_object.scale = Vector((0.01,0.01,0.01))
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
 
 def get_action_name(action_name, properties):
     """
@@ -1218,34 +1285,7 @@ def import_unreal_4_asset(file_path):
     # round keyframes
     round_keyframes(imported_actions)
 
-def import_tomerge_asset(file_path):
-    """
-    This function imports an unreal asset, fixes the armature scale factor, and rounds the keyframe to the nearest
-    integer.
 
-    :param str file_path: The full file path the file on disk.
-    """
-    # maybe get all the actions in the .blend so we can discern them from the ones that are about to be imported...
-    existing_actions = [action for action in bpy.data.actions]
-
-    # import the fbx file
-    bpy.ops.import_scene.fbx(filepath=file_path)
-
-    # the list of imported actions
-    imported_actions = [action for action in bpy.data.actions if action not in existing_actions]
-
-    # scale the keyframes in the actions
-    scale_object_actions(bpy.context.selected_objects, imported_actions, 1)
-
-    
-
-    
-
-    # remove the object scale keyframes
-    remove_object_scale_keyframes(actions=imported_actions)
-
-    # round keyframes
-    round_keyframes(imported_actions)
 
 def import_asset(file_path, properties):
     """

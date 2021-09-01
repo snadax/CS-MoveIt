@@ -66,7 +66,7 @@ class MergeMeshs(bpy.types.Operator):
 
     def execute(self, context):
         #utilities.merge_meshs_imp(self.filepath)
-        utilities.merge_meshs_imp('C:\\Users\\JJYY\\Desktop\\H019\\ExportedBuildings.json')
+        utilities.merge_meshs_imp('C:\\Users\\JJYY\\AppData\\Local\\Colossal Order\\Cities_Skylines\\Addons\\ExportBuildings\\ExportedBuildings.json')
         
         return {'FINISHED'}  
 

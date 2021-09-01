@@ -58,6 +58,17 @@ class CreatePredefinedCollections(bpy.types.Operator):
         utilities.create_groups(properties)
         return {'FINISHED'}        
 
+#class MergeMeshs(bpy.types.Operator,importer.ImportJson):
+class MergeMeshs(bpy.types.Operator):
+    """"""
+    bl_idname = "wm.merge_meshs"
+    bl_label = "Merge Meshs"
+
+    def execute(self, context):
+        #utilities.merge_meshs_imp(self.filepath)
+        utilities.merge_meshs_imp('C:\\Users\\JJYY\\Desktop\\H019\\ExportedBuildings.json')
+        
+        return {'FINISHED'}  
 
 class NullOperator(bpy.types.Operator):
     """This is an operator that changes nothing, but it used to clear the undo stack"""

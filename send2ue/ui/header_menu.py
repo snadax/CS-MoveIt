@@ -92,6 +92,11 @@ def create_collections_operator(self, context):
     """
     self.layout.operator('wm.create_predefined_collections')
 
+def merge_meshs_operator(self, context):
+    """
+
+    """
+    self.layout.operator('wm.merge_meshs')
 
 def add_pipeline_menu():
     """
@@ -106,12 +111,14 @@ def add_pipeline_menu():
         bpy.types.TOPBAR_MT_Pipeline.remove(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(export_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.remove(merge_meshs_operator)
 
 
     finally:
         bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
         bpy.types.TOPBAR_MT_Pipeline.append(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.append(merge_meshs_operator)
 
 
 def remove_parent_menu():

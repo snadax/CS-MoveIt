@@ -6,7 +6,7 @@ from . import operators
 from . import properties
 from .dependencies import remote_execution
 from .ui import header_menu, addon_preferences, importer
-from .functions import export, unreal, validations, utilities
+from .functions import export, unreal, validations, utilities,parsejson
 
 # NOTE: The blender version in the `bl_info` dictionary is for the minimum
 #  blender version support and should only be changed when there's new
@@ -30,6 +30,7 @@ modules = [
     unreal,
     importer,
     utilities,
+    parsejson,
     operators,
     properties,
     validations,
@@ -42,6 +43,7 @@ classes = [
     operators.AdvancedSend2Ue,
     operators.ImportAsset,
     operators.CreatePredefinedCollections,
+    operators.MergeMeshs,
     operators.NullOperator,
     addon_preferences.SendToUnrealPreferences,
     header_menu.TOPBAR_MT_Export,

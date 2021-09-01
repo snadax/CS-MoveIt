@@ -9,6 +9,56 @@ import tempfile
 from mathutils import Vector, Quaternion
 from . import unreal
 
+import json
+def merge_meshs_imp(filepath):
+
+    # 加载json文件
+    f = open(filepath, 'r', encoding='utf-8')
+    data = f.read()
+    f.close()
+    obj = json.loads(data)
+    
+    #遍历submesh 找到要加载的所有fbx
+    toLoadFbx = {}
+    for i in obj:
+        for j in i["submeshs"]:
+            toLoadFbx[i["group"]+"/"+j+".fbx"] = i
+        print(i["group"])
+        print(i["name"])
+        print(i["angle"])
+
+    #导入所有fbx
+    
+    prepath = os.path.dirname(filepath)
+    for i in toLoadFbx:
+        import_unreal_4_asset(prepath+"\\"+i)
+        toLoadFbx[i] = bpy.context.selected_objects
+
+    #移除所有材质槽
+    for obj in bpy.data.objects:
+        if  obj.type == 'MESH':
+            obj.active_material_index = 0
+            for i in range(len(obj.material_slots)):
+                bpy.ops.object.material_slot_remove({'object': obj})
+    
+    #合并所有模型
+    for obj in bpy.data.objects:
+        if  obj.type == 'MESH':
+            obj.select_set(True)
+            bpy.context.view_layer.objects.active = obj
+        else:
+            obj.select_set(False)
+    bpy.ops.object.join()
+        
+        
+    #添加一个材质槽
+    for obj in bpy.data.objects:
+        if  obj.type == 'MESH':
+            bpy.ops.object.material_slot_add({'object': obj})
+    
+    
+    #print(obj)
+    
 
 def get_action_name(action_name, properties):
     """
@@ -1141,7 +1191,7 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
 
             # apply the scale on the object
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-
+            
 
 def import_unreal_4_asset(file_path):
     """
@@ -1168,6 +1218,34 @@ def import_unreal_4_asset(file_path):
     # round keyframes
     round_keyframes(imported_actions)
 
+def import_tomerge_asset(file_path):
+    """
+    This function imports an unreal asset, fixes the armature scale factor, and rounds the keyframe to the nearest
+    integer.
+
+    :param str file_path: The full file path the file on disk.
+    """
+    # maybe get all the actions in the .blend so we can discern them from the ones that are about to be imported...
+    existing_actions = [action for action in bpy.data.actions]
+
+    # import the fbx file
+    bpy.ops.import_scene.fbx(filepath=file_path)
+
+    # the list of imported actions
+    imported_actions = [action for action in bpy.data.actions if action not in existing_actions]
+
+    # scale the keyframes in the actions
+    scale_object_actions(bpy.context.selected_objects, imported_actions, 1)
+
+    
+
+    
+
+    # remove the object scale keyframes
+    remove_object_scale_keyframes(actions=imported_actions)
+
+    # round keyframes
+    round_keyframes(imported_actions)
 
 def import_asset(file_path, properties):
     """

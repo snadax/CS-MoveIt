@@ -173,10 +173,10 @@ namespace MoveIt
             if (Action.selection.Count == 0) return;
 
             StringBuilder jsonstr = new StringBuilder();
+            Int32 num = 0;
             jsonstr.Append("[");
             foreach (var selectbuild in Action.selection)
             {
-
                 Building bd = BuildingManager.instance.m_buildings.m_buffer[selectbuild.id.Building];
                 if (bd.m_flags != Building.Flags.None)
                 {
@@ -184,13 +184,16 @@ namespace MoveIt
                     string[] str = bd.Info.name.Split('.');
                     if (str.Length == 2)
                     {
+
+                        jsonstr.Append($"\"name\":\"{num++}\",");
                         jsonstr.Append($"\"group\":\"{str[0]}\",");
-                        jsonstr.Append($"\"name\":\"{str[1].Replace("_Data", string.Empty).Replace(" ", string.Empty)}\",");
+                        jsonstr.Append($"\"mesh\":\"{str[1].Replace("_Data", string.Empty).Replace(" ", string.Empty)}\",");
                     }
                     else
                     {
+                        jsonstr.Append($"\"name\":\"{num++}\",");
                         jsonstr.Append($"\"group\":\"\",");
-                        jsonstr.Append($"\"name\":\"{bd.Info.name}\",");
+                        jsonstr.Append($"\"mesh\":\"{bd.Info.name}\",");
                     }
                     jsonstr.Append($"\"angle\":\"{bd.m_angle}\",");
                     jsonstr.Append($"\"x\":\"{bd.m_position.x}\",");
@@ -216,10 +219,15 @@ namespace MoveIt
             {
                 Directory.CreateDirectory(path);
             }
-
-            string fileName = Path.Combine(path, "ExportedBuildings.json");
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            
+            string fileName = Path.Combine(path, $"Buildings-{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.json");
+            //string fileName = Path.Combine(path, $"ExportedBuildings.json");
             using (StreamWriter sw = new StreamWriter(fileName))
+            { 
                 sw.WriteLine(jsonstr.ToString());
+                Log.Debug($"export:{fileName}");
+            }
         }
     }
 }
